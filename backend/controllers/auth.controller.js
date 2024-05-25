@@ -45,9 +45,33 @@ export const signup = async (req, res) => {
     console.log(`error occured during signup`, error.message)
   }
 };
-export const login = (req, res) => {
-  res.send("login");
+export const login = async (req, res) => {
+  try {
+    const {username, password} = req.body;
+    const user = await User.findOne({username})
+    const passCheck = await bcrypt.compare(password, user?.password || '')
+    if (!user || !passCheck) {
+      res.status(401).json({message: "Invalid cridentials"})
+    }
+    generateTokenAndSetCookie(user._id, res)
+    res.status(201).json({
+      message: `successfuly logged in up`,
+      _id: user._id,
+      fullName: user.fullName,
+      gender: user.gender,
+      profilePic: user.profilePic,
+  })
+  } catch (error) {
+    res.status(500).json({error: `internal server error`})
+    console.log(`error occured during login`, error.message)
+  }
 };
 export const logout = (req, res) => {
-  res.send("logout");
+  try {
+    res.cookie("jwt", "", {maxAge:0})
+    res.status(200).json({message: `logout sucess!!`})
+  } catch (error) {
+    res.status(500).json({error: `internal server error`})
+    console.log(`error occured during logou`, error.message)
+  }
 };

@@ -51,10 +51,10 @@ export const login = async (req, res) => {
     const user = await User.findOne({ username });
     const passCheck = await bcrypt.compare(password, user?.password || "");
     if (!user || !passCheck) {
-      res.status(401).json({ message: "Invalid cridentials" });
+      return res.status(400).json({ error: "Invalid cridentials" });
     }
     generateTokenAndSetCookie(user._id, res);
-    res.status(201).json({
+    res.status(200).json({
       message: `successfuly logged in up`,
       _id: user._id,
       fullName: user.fullName,
